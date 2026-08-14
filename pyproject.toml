@@ -1,0 +1,12 @@
+[project]
+name = "tox21-research"
+version = "0.1.0"
+description = "Reproducible multi-endpoint toxicity prediction on public Tox21 data"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100

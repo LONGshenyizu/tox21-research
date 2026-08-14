@@ -1,0 +1,40 @@
+# Tox21 多终点毒性预测：可复现研究
+
+基于公开 Tox21 数据（12 个核受体/应激反应测定终点）的多终点毒性预测研究，目标是**来源可溯、协议合理、结果可复现**的完整流程与研究代码库，而非单一模型刷榜。
+
+## 目录结构
+
+```text
+data/raw/            原始数据（PROVENANCE.md 记录 URL/校验和/日期；由 scripts/download_data.py 重建）
+src/tox21_research/  核心库：数据加载、scaffold 分割、特征、模型、评价
+configs/             实验配置（yaml）
+scripts/             数据下载、审计、训练、评测入口脚本
+tests/               pytest 单元测试
+results/interim/     阶段性实验输出（审计表、模型对比等）
+results/final/       冻结后的最终结果
+reports/             研究计划、数据审计、最终研究报告
+references/          外部资料清单（标题/URL/访问日期/支持的判断）
+environment/         requirements.txt（pip freeze）与 Python 版本
+```
+
+## 快速开始
+
+```bash
+python -m venv .venv
+.venv/Scripts/python -m pip install -r environment/requirements.txt   # Windows; Linux/Mac 为 .venv/bin/python
+.venv/Scripts/python scripts/download_data.py    # 下载并校验原始数据（SHA-256 固定）
+.venv/Scripts/python -m pytest tests/ -q         # 单元测试
+.venv/Scripts/python scripts/audit_data.py       # 数据审计 → results/interim/audit/
+```
+
+阶段 2/3 的训练与评测命令见 `reports/final_report.md`（完成后补充）。
+
+## 当前状态
+
+- [x] 阶段 1：来源确认、数据审计、研究计划（`reports/data_audit.md`、`reports/research_plan.md`）
+- [ ] 阶段 2：baseline → 验证 → 误差分析 → 改进 → 选型
+- [ ] 阶段 3：结果冻结与最终报告
+
+## 数据与协议（一句话版）
+
+MoleculeNet/DeepChem 托管的 Tox21 CSV（7,831×12，SHA-256 固定，已验证与 2014 挑战赛原始数据零标签冲突）；scaffold 80/10/10 分割（DeepChem 算法逐行复刻）；主指标 ROC-AUC（每终点+宏平均），辅以 PR-AUC 与 balanced accuracy。详见 `reports/research_plan.md`。
