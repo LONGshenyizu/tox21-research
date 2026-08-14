@@ -1,0 +1,10 @@
+family,params,seed,roc_auc_mean,pr_auc_mean,balanced_accuracy_mean,seconds
+lgbm_ecfp4,"leaves=63,trees=800",42,0.7376,0.3665,0.6028,33.5
+logreg_ecfp4,C=0.1,42,0.7367,0.3384,0.6579,3.5
+lgbm_ecfp4,"leaves=31,trees=400",42,0.7311,0.3491,0.6136,12.6
+logreg_ecfp4,C=1.0,42,0.7125,0.295,0.6274,5.1
+logreg_maccs,C=1.0,42,0.7087,0.2644,0.6482,2.5
+mlp_ecfp4_multitask,"512-256,do0.2,adamw",43,0.7053,0.3213,0.6446,8.4
+mlp_ecfp4_multitask,"512-256,do0.2,adamw",44,0.7004,0.316,0.6472,8.4
+mlp_ecfp4_multitask,"512-256,do0.2,adamw",42,0.699,0.3218,0.643,13.5
+logreg_ecfp4,C=10.0,42,0.6882,0.2645,0.6154,7.5

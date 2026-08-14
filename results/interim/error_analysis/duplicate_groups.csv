@@ -1,0 +1,5 @@
+inchikey,mol_id,smiles,split,label_NR-AR,label_NR-AR-LBD,label_NR-AhR,label_NR-Aromatase,label_NR-ER,label_NR-ER-LBD,label_NR-PPAR-gamma,label_SR-ARE,label_SR-ATAD5,label_SR-HSE,label_SR-MMP,label_SR-p53,p_NR-AR,p_NR-AR-LBD,p_NR-AhR,p_NR-Aromatase,p_NR-ER,p_NR-ER-LBD,p_NR-PPAR-gamma,p_SR-ARE,p_SR-ATAD5,p_SR-HSE,p_SR-MMP,p_SR-p53
+CARJPEPCULYFFP-UHFFFAOYSA-M,TOX9279,O=C(O)c1cc(C(=O)O)cc(S(=O)(=O)[O-])c1,train,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,,,,,,,,,,,,
+CARJPEPCULYFFP-UHFFFAOYSA-M,TOX24819,O=C([O-])c1cc(C(=O)O)cc(S(=O)(=O)O)c1,train,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,,0.0,,,,,,,,,,,,
+CEJLBZWIKQJOAT-UHFFFAOYSA-M,TOX4994,O=c1[n-]c(=O)n(Cl)c(=O)n1Cl,test,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,,,,,,,,,,,,
+CEJLBZWIKQJOAT-UHFFFAOYSA-M,TOX6178,O=c1nc([O-])n(Cl)c(=O)n1Cl,valid,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.001,0.0,0.0,0.007,0.0,0.0,0.001,0.0

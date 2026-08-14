@@ -1,0 +1,26 @@
+{
+  "source_csv": "tox21_moleculenet.csv.gz",
+  "n_total_rows": 7831,
+  "n_dropped_invalid_smiles": 8,
+  "dropped_mol_ids": [
+    "TOX31563",
+    "TOX24724",
+    "TOX24723",
+    "TOX24552",
+    "TOX24622",
+    "TOX7518",
+    "TOX28892",
+    "TOX28623"
+  ],
+  "n_modeling": 7823,
+  "split_sizes": {
+    "train": 6258,
+    "valid": 782,
+    "test": 783
+  },
+  "split": "murcko scaffold 80/10/10 (DeepChem-equivalent, deterministic)",
+  "features": {
+    "ecfp4": "Morgan radius 2, 2048 bits",
+    "maccs": "167 keys"
+  }
+}

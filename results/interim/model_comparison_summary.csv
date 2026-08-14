@@ -1,0 +1,8 @@
+family,params,roc_auc_mean,roc_auc_std,pr_auc_mean,seconds
+lgbm_ecfp4,"leaves=63,trees=800",0.7376,,0.3665,33.5
+logreg_ecfp4,C=0.1,0.7367,,0.3384,3.5
+lgbm_ecfp4,"leaves=31,trees=400",0.7311,,0.3491,12.6
+logreg_ecfp4,C=1.0,0.7125,,0.295,5.1
+logreg_maccs,C=1.0,0.7087,,0.2644,2.5
+mlp_ecfp4_multitask,"512-256,do0.2,adamw",0.7015666666666668,0.0033080709383768296,0.3197,10.1
+logreg_ecfp4,C=10.0,0.6882,,0.2645,7.5

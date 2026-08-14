@@ -1,0 +1,28 @@
+# 阶段 2 模型选型实验配置（协议见 reports/research_plan.md）
+# 全部实验只用 train 拟合、在 valid 上评估选型；test 冻结到阶段 3。
+
+feature_set: ecfp4          # 主特征；maccs 仅用于特征敏感性对照
+seeds: [42, 43, 44]         # MLP 用 3 种子；LogReg/LGBM 确定性，只用首个种子
+
+logreg:
+  C_grid: [0.1, 1.0, 10.0]
+  max_iter: 2000
+
+lgbm:
+  learning_rate: 0.05
+  grid:
+    - {num_leaves: 31, n_estimators: 400}
+    - {num_leaves: 63, n_estimators: 800}
+
+mlp:
+  hidden: [512, 256]
+  dropout: 0.2
+  lr: 0.001
+  weight_decay: 0.0001
+  batch_size: 256
+  max_epochs: 100
+  patience: 10
+
+feature_check:              # 特征敏感性：LogReg(C=1) on MACCS
+  family: logreg
+  C: 1.0
