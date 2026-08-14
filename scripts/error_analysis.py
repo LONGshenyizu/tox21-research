@@ -34,7 +34,7 @@ def main():
     P_valid = predict_per_task(models, X[va])
     table, macro = evaluate_matrix(Y[va], P_valid, task_names=tasks)
     OUT.mkdir(parents=True, exist_ok=True)
-    table.to_csv(OUT / "valid_task_metrics.csv", index=False)
+    table.to_csv(OUT / "valid_task_metrics.csv")
     rank_tasks(table).to_csv(OUT / "valid_task_ranking.csv")
 
     csv = load_moleculenet_csv(ROOT / "data" / "raw" / "tox21_moleculenet.csv.gz")

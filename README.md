@@ -22,18 +22,24 @@ environment/         requirements.txt（pip freeze）与 Python 版本
 ```bash
 python -m venv .venv
 .venv/Scripts/python -m pip install -r environment/requirements.txt   # Windows; Linux/Mac 为 .venv/bin/python
-.venv/Scripts/python scripts/download_data.py    # 下载并校验原始数据（SHA-256 固定）
-.venv/Scripts/python -m pytest tests/ -q         # 单元测试
-.venv/Scripts/python scripts/audit_data.py       # 数据审计 → results/interim/audit/
+.venv/Scripts/python scripts/download_data.py     # 下载并校验原始数据（SHA-256 固定）
+.venv/Scripts/python -m pytest tests/ -q          # 单元测试
+.venv/Scripts/python scripts/audit_data.py        # 数据审计 → results/interim/audit/
+.venv/Scripts/python scripts/prepare_data.py      # 特征与分割缓存
+.venv/Scripts/python scripts/run_experiments.py   # 阶段 2 模型选型（valid）
+.venv/Scripts/python scripts/error_analysis.py    # 验证集误差分析
+.venv/Scripts/python scripts/final_test.py        # 阶段 3 冻结 test 评测（一次性）
+.venv/Scripts/python scripts/random_split_check.py# random 分割敏感性
+.venv/Scripts/python scripts/predict.py in.smiles out.csv   # 对 SMILES 列表推理
 ```
 
-阶段 2/3 的训练与评测命令见 `reports/final_report.md`（完成后补充）。
-
-## 当前状态
+## 当前状态（研究已完成，结果已冻结）
 
 - [x] 阶段 1：来源确认、数据审计、研究计划（`reports/data_audit.md`、`reports/research_plan.md`）
-- [ ] 阶段 2：baseline → 验证 → 误差分析 → 改进 → 选型
-- [ ] 阶段 3：结果冻结与最终报告
+- [x] 阶段 2：基线与选型（LogReg/LGBM/多任务 MLP；valid 宏 ROC-AUC 0.7376）
+- [x] 阶段 3：结果冻结与最终报告（`reports/final_report.md`）
+
+**冻结结果**：LightGBM + ECFP4，scaffold test 宏 ROC-AUC **0.7003**（PR-AUC 0.3211）；random 分割对照 0.807±0.010——协议选择的影响大于模型选择。
 
 ## 数据与协议（一句话版）
 

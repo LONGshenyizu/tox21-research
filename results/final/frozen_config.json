@@ -1,0 +1,24 @@
+{
+  "family": "lgbm_ecfp4",
+  "feature_set": "ecfp4",
+  "params": {
+    "num_leaves": 63,
+    "n_estimators": 800,
+    "learning_rate": 0.05
+  },
+  "seeds": [
+    42
+  ],
+  "random_split_seeds": [
+    0,
+    1,
+    2
+  ],
+  "selection": {
+    "criterion": "valid macro ROC-AUC (scaffold split)",
+    "date": "2026-08-14",
+    "valid_roc_auc_mean": 0.7376,
+    "valid_pr_auc_mean": 0.3665,
+    "runner_up": "logreg_ecfp4 C=0.1 (valid roc_auc 0.7367, pr_auc 0.3384)"
+  }
+}
