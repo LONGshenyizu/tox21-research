@@ -8,7 +8,7 @@
 |---|---|---|---|
 | S1 | Tox21 Data Challenge 2014 官方数据页（NIH/NCATS，tripod.nih.gov，存档快照 `data/raw/challenge2014/_data_page.html`） | https://tripod.nih.gov/tox21/challenge/data.jsp | 原始训练/测试/评测数据文件清单与下载；12 个测定对应的 PubChem AID；官方 baseline 为 LyChI 结构标准化 + PubChem 指纹 + 朴素贝叶斯 |
 | S2 | DeepChem MoleculeNet Tox21 加载器源码 `deepchem/molnet/load_function/tox21_datasets.py`（master） | https://github.com/deepchem/deepchem/blob/master/deepchem/molnet/load_function/tox21_datasets.py | 本研究主数据 CSV 的权威下载 URL；12 任务名清单；DeepChem 默认协议（ECFP 指纹 / scaffold 分割 / 类平衡加权）；其 docstring 同时注明该库“建议 random split”，说明两种协议并存 |
-| S3 | DeepChem `deepchem/splits/splitters.py`（master）中 `ScaffoldSplitter` | https://github.com/deepchem/deepchem/blob/master/deepchem/splits/splitters.py | 本研究 scaffold 分割的精确算法（按组规模与首索引降序贪心填充；无效 SMILES 跳过；确定性），据此逐行复刻并单元测试 |
+| S3 | DeepChem `deepchem/splits/splitters.py`（master）中 `ScaffoldSplitter` | https://github.com/deepchem/deepchem/blob/master/deepchem/splits/splitters.py | 本研究 scaffold 分割的精确算法（按组规模与首索引降序贪心填充；无效 SMILES 跳过；确定性），据此按行为规格实现并以单元测试锁定（DeepChem 源码本身未随仓库快照） |
 | S4 | Therapeutics Data Commons（TDC）Tox21 页面 | https://tdcommons.ai/single_pred_tasks/tox/ | 独立佐证 7,831×12 版本即社区流通的 "Tox21" 基准数据；TDC 提供 random/scaffold 两种分割 |
 
 ## 2. 原始研究论文

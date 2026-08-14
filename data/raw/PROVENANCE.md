@@ -11,7 +11,7 @@
 | SHA-256 | `45d09792492ce049039dd24aa27b07fc79ce20c573187d4d90bcd178c0c0d360` |
 | 文件时间戳 | 2017-12-21（gzip 头内原始文件名 `tox21.csv`） |
 | 版本说明 | DeepChem `load_tox21()` 的官方下载数据（`deepchem/molnet/load_function/tox21_datasets.py` 中 `TOX21_URL` 与本 URL 一致）。MoleculeNet 论文正文称 8014 化合物，但该托管 CSV 实为 7831 行；本仓库以该 CSV 文件本身（校验和固定）为准。 |
-| 上游来源 | 2014 Tox21 Data Challenge 训练数据（见下），本仓库已做逐分子交叉验证（见 `reports/data_audit.md`） |
+| 上游来源 | 2014 Tox21 Data Challenge 训练数据（见下），本仓库已做化合物编号级交叉验证（标签一致性按批次聚约定做敏感性分析，见 `reports/data_audit.md` §1） |
 
 ## 2. Tox21 Data Challenge 2014 原始文件
 

@@ -43,3 +43,11 @@ v1 冻结：`84ccf59`（永久保留为首次自主实验结果）｜ 阶段 4 �
 3. MoleculeNet 8,041→7,831 的精确去重规则无官方脚本可考（对应关系与标签覆盖已验证）。
 4. 8,043 闭合为数字层面，未获 Huang et al. 计数口径的直接佐证。
 5. "与 DeepChem ScaffoldSplitter 逐行一致"只有仓库内行为规格证据（算法转录自其公开源码，外部源码未入库）。
+
+## 六、验收备注处理（工程阶段前收尾）
+
+v2 只读验收（ACCEPT WITH NOTES）留下三条备注，均为此后纯文档收尾，不影响任何数据、模型、预测或指标：
+
+1. **majority 约定 499 vs 102**：阶段 4 复现记录（`reports/audit/reproduction_check.md` §3）中的 majority=499 使用 pandas `round()` 的银行家舍入（平票 0.5→0，即**平票算非活性**）；v2 的 `compare.py::challenge_labels_by_cid("majority")` 显式定义 `mean>=0.5 → 1`（**平票算活性**），得 102。两者为同一数据在不同平票规则下的自洽结果（差值恰好由平票化合物贡献）；v2 规则已在代码 docstring、`data_audit.md` §1 与回归测试中显式固定。阶段 4 报告中的 11–499 区间按此理解。
+2. **"逐行复刻 DeepChem"**：`final_report.md` §2、`research_plan.md` §3、`references/sources.md` S3 已改为"按其公开源码的行为规格实现并以单元测试锁定（源码未随仓库快照）"。
+3. **PROVENANCE 措辞与 std 口径**：`data/raw/PROVENANCE.md` 改为"化合物编号级交叉验证（标签一致性按批次聚约定做敏感性分析）"；`final_report.md` §8 的 ±0.010 注明为总体标准差（ddof=0，样本标准差 0.0124）。

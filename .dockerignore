@@ -1,0 +1,17 @@
+# keep the image build context minimal: only environment/, src/, results/final/ are used
+.git
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+data
+results/interim
+reports
+references
+tests
+scripts
+configs
+Dockerfile
+.dockerignore
+api_baseline_out.csv
+*.md
