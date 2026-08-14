@@ -10,9 +10,6 @@
     "n_wildcard_atoms": 0,
     "n_with_at_least_one_label": 7831,
     "n_all_labels_missing": 0,
-    "mol_id_prefixes": {
-      "TOX": 7831
-    },
     "duplicates": {
       "n_duplicate_structure_groups": 2,
       "n_rows_in_duplicate_groups": 4,
@@ -20,48 +17,37 @@
       "conflict_tasks": {
         "NR-ER": 1
       }
-    },
-    "descriptors": {
-      "mw": {
-        "min": 9.01,
-        "median": 240.3,
-        "max": 1877.66
-      },
-      "logp": {
-        "min": -17.41,
-        "median": 2.37,
-        "max": 22.61
-      },
-      "tpsa": {
-        "min": 0.0,
-        "median": 46.53,
-        "max": 777.98
-      },
-      "heavy_atoms": {
-        "min": 1.0,
-        "median": 16.0,
-        "max": 132.0
-      },
-      "ring_count": {
-        "min": 0.0,
-        "median": 1.0,
-        "max": 30.0
-      },
-      "rotatable": {
-        "min": 0.0,
-        "median": 3.0,
-        "max": 47.0
-      }
     }
+  },
+  "modeling_frame": {
+    "n_modeling": 7823,
+    "n_dropped_unparseable": 8,
+    "dropped_mol_ids": [
+      "TOX31563",
+      "TOX24724",
+      "TOX24723",
+      "TOX24552",
+      "TOX24622",
+      "TOX7518",
+      "TOX28892",
+      "TOX28623"
+    ],
+    "split_sizes": {
+      "train": 6258,
+      "valid": 782,
+      "test": 783
+    },
+    "split": "murcko scaffold 80/10/10 on the modeling frame (deterministic)"
   },
   "challenge_train_sdf": {
     "n_raw_records": 11764,
     "n_parsed": 11761,
+    "n_unique_dsstox_cid": 8041,
+    "n_cid_with_multiple_samples": 2952,
+    "max_samples_per_cid": 6,
     "n_unique_inchikey": 8041,
-    "n_duplicate_inchikey_groups": 2952,
-    "n_compound_roots_with_multiple_samples": 1204,
     "n_with_at_least_one_label": 11761,
-    "n_all_labels_missing": 0
+    "sample_multiplicity_note": "multiple NCGC sample records per DSSTox_CID are qHTS re-tests of the same compound; no canonical batch exists, so cross-version label comparison reports three aggregation conventions (see cross_version_label_agreement.csv)"
   },
   "challenge_eval_sets": {
     "leaderboard_test": {
@@ -77,22 +63,32 @@
     }
   },
   "cross_version": {
-    "n_csv_rows_matched_to_sdf_by_inchikey": 7823,
-    "n_csv_rows_unmatched": 8,
-    "n_label_conflicts_total": 0,
-    "n_sdf_only_labels_total": 0
+    "mapping": "mol_id TOX#### numeric part == DSSTox_CID (empirical 1:1 mapping)",
+    "n_matched_rows": 7831,
+    "label_conflicts_by_aggregation": {
+      "first": 228,
+      "any_active": 11,
+      "majority": 102
+    },
+    "n_csv_only_labels_first": 57,
+    "n_sdf_only_labels_first": 0,
+    "structure_diagnostic_inchikey": {
+      "matched": 6562,
+      "unmatched": 1261,
+      "no_structure": 8
+    },
+    "structure_diagnostic_note": "InChIKey equality is a stricter identity than compound id: unmatched rows reflect structure-standardization differences (salt/protonation/tautomer spelling), not absent compounds"
   },
   "split": {
     "sizes": {
-      "train": 6264,
-      "valid": 783,
-      "test": 776,
-      "skipped_invalid_smiles": 8
+      "train": 6258,
+      "valid": 782,
+      "test": 783
     },
     "n_inchikeys_spanning_multiple_splits": 1,
     "test_molecules_with_train_neighbor_ge_0.95": 7,
     "test_molecules_with_train_neighbor_ge_0.85": 12,
-    "test_max_tanimoto_mean": 0.4356,
-    "test_max_tanimoto_median": 0.4048
+    "test_max_tanimoto_mean": 0.4354,
+    "test_max_tanimoto_median": 0.4054
   }
 }

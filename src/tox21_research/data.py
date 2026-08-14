@@ -5,6 +5,8 @@ import math
 import pandas as pd
 from rdkit import Chem
 
+from tox21_research.splits import scaffold_split_indices
+
 # Canonical task order, identical to the MoleculeNet Tox21 CSV column order.
 TASKS = [
     "NR-AR",
@@ -93,3 +95,21 @@ def load_challenge_sdf(path):
     df = pd.DataFrame.from_dict(dict(rows), orient="index")
     df.index.name = "sample_id"
     return df
+
+
+def load_modeling_data(csv_path):
+    """Modeling frame and deterministic scaffold split shared by preparation and audit.
+
+    Rows whose SMILES RDKit cannot parse are dropped (their ids are returned).
+    Returns (frame, train_idx, valid_idx, test_idx, dropped_ids). prepare_data
+    and audit_data both call this, so the audited split can never silently
+    diverge from the modeling split.
+    """
+    df = load_moleculenet_csv(csv_path)
+    parseable = [Chem.MolFromSmiles(s) is not None for s in df["smiles"]]
+    dropped = [str(m) for m, ok in zip(df.index, parseable) if not ok]
+    frame = df.loc[parseable]
+    train, valid, test, skipped = scaffold_split_indices(frame["smiles"].tolist())
+    if skipped:
+        raise ValueError("unparseable SMILES remained after filtering")
+    return frame, train, valid, test, dropped

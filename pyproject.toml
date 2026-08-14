@@ -7,6 +7,9 @@ requires-python = ">=3.11"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: real-data regression tests (require downloaded raw data; run with 'pytest -m slow')",
+]
 
 [tool.ruff]
 line-length = 100

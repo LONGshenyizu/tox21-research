@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 colorama==0.4.6
 contourpy==1.3.3
 cycler==0.12.1

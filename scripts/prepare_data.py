@@ -5,12 +5,11 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from rdkit import Chem, RDLogger
+from rdkit import RDLogger
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tox21_research.data import TASKS, load_moleculenet_csv  # noqa: E402
+from tox21_research.data import TASKS, load_modeling_data  # noqa: E402
 from tox21_research.features import ecfp_matrix, maccs_matrix  # noqa: E402
-from tox21_research.splits import scaffold_split_indices  # noqa: E402
 
 RDLogger.DisableLog("rdApp.*")
 
@@ -21,10 +20,8 @@ OUT_DIR = ROOT / "data" / "processed"
 
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    df = load_moleculenet_csv(CSV)
-    valid = [Chem.MolFromSmiles(s) is not None for s in df["smiles"]]
-    dropped = [str(i) for i, ok in zip(df.index, valid) if not ok]
-    frame = df.loc[valid].reset_index()
+    frame, train, val, test, dropped = load_modeling_data(CSV)
+    frame = frame.reset_index()
     smiles = frame["smiles"].tolist()
 
     print(f"features: ECFP4-2048 for {len(smiles)} molecules ...")
@@ -32,8 +29,6 @@ def main():
     print("features: MACCS-167 ...")
     X_maccs = maccs_matrix(smiles)
     Y = frame[TASKS].to_numpy(dtype=float)
-    train, val, test, skipped = scaffold_split_indices(smiles)
-    assert not skipped, "unparseable SMILES should have been removed already"
 
     np.savez_compressed(
         OUT_DIR / "tox21_modeling.npz",
@@ -48,7 +43,7 @@ def main():
     )
     manifest = {
         "source_csv": str(CSV.name),
-        "n_total_rows": len(df),
+        "n_total_rows": len(frame) + len(dropped),
         "n_dropped_invalid_smiles": len(dropped),
         "dropped_mol_ids": dropped,
         "n_modeling": len(smiles),

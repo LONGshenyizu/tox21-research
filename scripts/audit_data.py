@@ -1,5 +1,7 @@
-# ABOUTME: Stage-1 data audit: runs structural, label, cross-version, and split-leakage checks on both Tox21 data versions.
-# ABOUTME: Writes machine-readable tables to results/interim/audit/ and headline numbers to audit_summary.json.
+# ABOUTME: Data audit for the Tox21 study: structure/label checks on the MoleculeNet CSV,
+# ABOUTME: cross-version comparison with the 2014 challenge SDF by explicit compound id,
+# ABOUTME: and leakage/similarity checks on the exact modeling frame and split used for training
+# ABOUTME: (guarded by a tripwire against divergence from the cached npz).
 import json
 import sys
 from collections import Counter
@@ -12,8 +14,18 @@ from rdkit.Chem import Descriptors, rdMolDescriptors
 from rdkit.Chem.AllChem import GetMorganFingerprintAsBitVect
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tox21_research.data import TASKS, load_challenge_sdf, load_moleculenet_csv  # noqa: E402
-from tox21_research.splits import scaffold_split_indices  # noqa: E402
+from tox21_research.compare import (  # noqa: E402
+    AGGREGATIONS,
+    intra_compound_disagreement,
+    label_agreement,
+    structure_match,
+)
+from tox21_research.data import (  # noqa: E402
+    TASKS,
+    load_challenge_sdf,
+    load_moleculenet_csv,
+    load_modeling_data,
+)
 
 RDLogger.DisableLog("rdApp.*")
 
@@ -23,6 +35,7 @@ CSV_PATH = ROOT / "data" / "raw" / "tox21_moleculenet.csv.gz"
 CHALLENGE_SDF = ROOT / "data" / "raw" / "challenge2014" / "tox21_10k_data_all.sdf"
 TEST_SDF = ROOT / "data" / "raw" / "challenge2014" / "tox21_10k_challenge_test.sdf"
 SCORE_SDF = ROOT / "data" / "raw" / "challenge2014" / "tox21_10k_challenge_score.sdf"
+MODELING_NPZ = ROOT / "data" / "processed" / "tox21_modeling.npz"
 
 ORGANOGENIC = {"C", "N", "O", "S", "P", "F", "Cl", "Br", "I", "B", "Si", "Se"}
 
@@ -98,45 +111,31 @@ def duplicate_report(df):
                 conflict_tasks[task] += 1
     return {
         "n_duplicate_structure_groups": len(dup_keys),
-        "n_rows_in_duplicate_groups": int(
-            sum(len(groups[k]) for k in dup_keys)
-        ),
+        "n_rows_in_duplicate_groups": int(sum(len(groups[k]) for k in dup_keys)),
         "n_task_label_conflicts_within_duplicates": conflicts,
         "conflict_tasks": dict(conflict_tasks),
     }
 
 
-def cross_version_agreement(mn, ch):
-    """Join MoleculeNet rows to challenge SDF by InChIKey; per-task label agreement."""
-    joined = mn.join(ch, rsuffix="_ch", how="left")
-    matched = joined["inchikey"].notna()
-    rows = []
-    for task in TASKS:
-        a, b = joined[task], joined[f"{task}_ch"]
-        both = matched & a.notna() & b.notna()
-        rows.append({
-            "task": task,
-            "n_csv_labeled": int(a.notna().sum()),
-            "n_matched": int(matched.sum()),
-            "n_both_labeled": int(both.sum()),
-            "n_agree": int((a[both] == b[both]).sum()),
-            "n_conflict": int((a[both] != b[both]).sum()),
-            "n_csv_only_labeled": int((matched & a.notna() & b.isna()).sum()),
-            "n_sdf_only_labeled": int((matched & a.isna() & b.notna()).sum()),
-        })
-    return pd.DataFrame(rows), joined
+def assert_split_matches_cache(frame, train, valid, test):
+    """Tripwire: the audited split must equal the cached modeling split."""
+    if not MODELING_NPZ.exists():
+        return
+    npz = np.load(MODELING_NPZ)
+    if [str(m) for m in npz["mol_ids"]] != list(frame.index):
+        raise ValueError("audit frame differs from cached modeling npz molecule order")
+    for name, idx in [("train_idx", train), ("valid_idx", valid), ("test_idx", test)]:
+        if list(npz[name]) != list(idx):
+            raise ValueError(f"audit split {name} differs from cached modeling npz")
 
 
-def split_audit(df):
-    """Scaffold split on the CSV order; sizes, per-split active rates, leakage checks."""
-    train, valid, test, skipped = scaffold_split_indices(df["smiles"].tolist())
-    sizes = {
-        "train": len(train), "valid": len(valid), "test": len(test),
-        "skipped_invalid_smiles": len(skipped),
-    }
+def split_checks(frame, train, valid, test):
+    """Sizes, per-split active rates, structure leakage, test-to-train similarity."""
+    assert_split_matches_cache(frame, train, valid, test)
+    sizes = {"train": len(train), "valid": len(valid), "test": len(test)}
     rates = []
     for name, idx in [("train", train), ("valid", valid), ("test", test)]:
-        sub = df.iloc[idx]
+        sub = frame.iloc[idx]
         for task in TASKS:
             labeled = sub[task].notna().sum()
             rates.append({
@@ -145,21 +144,18 @@ def split_audit(df):
                 "n_active": int((sub[task] == 1).sum()),
                 "active_rate": round(float((sub[task] == 1).sum() / labeled), 4) if labeled else np.nan,
             })
-    # structure leakage: same InChIKey appearing in different splits
-    # scaffold indices are positional; translate them to row labels once
-    labels = list(df.index)
+    labels = list(frame.index)
     split_of = {}
     for name, idx in [("train", train), ("valid", valid), ("test", test)]:
         for i in idx:
             split_of[labels[i]] = name
-    key_splits = df.groupby("inchikey").apply(
+    key_splits = frame.groupby("inchikey").apply(
         lambda g: {split_of[k] for k in g.index if k in split_of},
         include_groups=False,
     )
     cross = sum(1 for s in key_splits if len(s) > 1)
-    # fingerprint similarity of test to train (ECFP4, 2048 bits)
     fps = []
-    for smi in df["smiles"]:
+    for smi in frame["smiles"]:
         mol = Chem.MolFromSmiles(smi)
         fps.append(GetMorganFingerprintAsBitVect(mol, 2, nBits=2048) if mol else None)
     train_fps = [fps[i] for i in train if fps[i] is not None]
@@ -184,7 +180,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     summary = {}
 
-    # ---- MoleculeNet CSV ----
+    # ---- MoleculeNet CSV (full 7,831-row version description) ----
     print("Loading MoleculeNet CSV ...")
     mn = load_moleculenet_csv(CSV_PATH)
     desc = describe_molecules(mn["smiles"].tolist())
@@ -194,7 +190,6 @@ def main():
 
     ts = task_summary(mn)
     ts.to_csv(OUT / "moleculenet_task_summary.csv", index=False)
-    prefix_counts = Counter(str(i).split("-")[0][:3] for i in mn.index)
     summary["moleculenet"] = {
         "n_rows": len(mn),
         "n_valid_smiles": int(desc["valid"].sum()),
@@ -206,16 +201,19 @@ def main():
         "n_wildcard_atoms": int(desc["has_wildcard"].fillna(False).sum()),
         "n_with_at_least_one_label": int(mn[TASKS].notna().any(axis=1).sum()),
         "n_all_labels_missing": int(mn[TASKS].isna().all(axis=1).sum()),
-        "mol_id_prefixes": dict(prefix_counts),
         "duplicates": duplicate_report(mn_full),
-        "descriptors": {
-            k: {
-                "min": round(float(desc[k].min()), 2),
-                "median": round(float(desc[k].median()), 2),
-                "max": round(float(desc[k].max()), 2),
-            }
-            for k in ["mw", "logp", "tpsa", "heavy_atoms", "ring_count", "rotatable"]
-        },
+    }
+
+    # ---- Modeling frame + split (single source of truth with prepare_data) ----
+    print("Building modeling frame and split ...")
+    frame, train, valid, test, dropped = load_modeling_data(CSV_PATH)
+    frame_full = mn_full.loc[frame.index]
+    summary["modeling_frame"] = {
+        "n_modeling": len(frame),
+        "n_dropped_unparseable": len(dropped),
+        "dropped_mol_ids": dropped,
+        "split_sizes": {"train": len(train), "valid": len(valid), "test": len(test)},
+        "split": "murcko scaffold 80/10/10 on the modeling frame (deterministic)",
     }
 
     # ---- Challenge training SDF ----
@@ -225,20 +223,24 @@ def main():
     ch.to_csv(OUT / "challenge_molecule_table.csv")
     ch_ts = task_summary(ch)
     ch_ts.to_csv(OUT / "challenge_task_summary.csv", index=False)
-    roots = [s.rsplit("-", 1)[0] for s in ch.index]
+    intra_compound_disagreement(ch).to_csv(OUT / "challenge_sample_agreement.csv")
+    samples_per_cid = ch.groupby("dsstox_cid").size()
     summary["challenge_train_sdf"] = {
         "n_raw_records": raw_records,
         "n_parsed": len(ch),
+        "n_unique_dsstox_cid": int(ch["dsstox_cid"].nunique()),
+        "n_cid_with_multiple_samples": int((samples_per_cid > 1).sum()),
+        "max_samples_per_cid": int(samples_per_cid.max()),
         "n_unique_inchikey": int(ch["inchikey"].nunique()),
-        "n_duplicate_inchikey_groups": int((ch.groupby("inchikey").size() > 1).sum()),
-        "n_compound_roots_with_multiple_samples": int(
-            (pd.Series(roots).value_counts() > 1).sum()
-        ),
         "n_with_at_least_one_label": int(ch[TASKS].notna().any(axis=1).sum()),
-        "n_all_labels_missing": int(ch[TASKS].isna().all(axis=1).sum()),
+        "sample_multiplicity_note": (
+            "multiple NCGC sample records per DSSTox_CID are qHTS re-tests of the same "
+            "compound; no canonical batch exists, so cross-version label comparison "
+            "reports three aggregation conventions (see cross_version_label_agreement.csv)"
+        ),
     }
 
-    # ---- Challenge evaluation sets (structures only / partial labels) ----
+    # ---- Challenge evaluation sets ----
     test_set = load_challenge_sdf(TEST_SDF)
     score_set = load_challenge_sdf(SCORE_SDF)
     summary["challenge_eval_sets"] = {
@@ -255,27 +257,46 @@ def main():
         },
     }
 
-    # ---- Cross-version agreement ----
-    print("Cross-version agreement ...")
-    agreement, joined = cross_version_agreement(mn_full, ch)
-    agreement.to_csv(OUT / "cross_version_label_agreement.csv", index=False)
+    # ---- Cross-version comparison by compound id ----
+    print("Cross-version comparison (compound-id mapping) ...")
+    agreement_tables = {}
+    totals = {}
+    for aggregation in AGGREGATIONS:
+        table, agg_totals = label_agreement(mn, ch, aggregation)
+        agreement_tables[aggregation] = table
+        totals[aggregation] = agg_totals
+    long = pd.concat(
+        [t.assign(aggregation=agg) for agg, t in agreement_tables.items()]
+    ).reset_index()
+    long.to_csv(OUT / "cross_version_label_agreement.csv", index=False)
+    structure = structure_match(mn_full, ch)
+    pd.DataFrame([structure]).to_csv(OUT / "cross_version_structure.csv", index=False)
     summary["cross_version"] = {
-        "n_csv_rows_matched_to_sdf_by_inchikey": int(agreement["n_matched"].iloc[0]),
-        "n_csv_rows_unmatched": len(mn) - int(agreement["n_matched"].iloc[0]),
-        "n_label_conflicts_total": int(agreement["n_conflict"].sum()),
-        "n_sdf_only_labels_total": int(agreement["n_sdf_only_labeled"].sum()),
+        "mapping": "mol_id TOX#### numeric part == DSSTox_CID (empirical 1:1 mapping)",
+        "n_matched_rows": totals["first"]["n_matched_rows"],
+        "label_conflicts_by_aggregation": {
+            agg: totals[agg]["n_conflict_total"] for agg in AGGREGATIONS
+        },
+        "n_csv_only_labels_first": int(agreement_tables["first"]["n_csv_only"].sum()),
+        "n_sdf_only_labels_first": int(agreement_tables["first"]["n_sdf_only"].sum()),
+        "structure_diagnostic_inchikey": structure,
+        "structure_diagnostic_note": (
+            "InChIKey equality is a stricter identity than compound id: unmatched rows "
+            "reflect structure-standardization differences (salt/protonation/tautomer "
+            "spelling), not absent compounds"
+        ),
     }
 
-    # ---- Scaffold split leakage audit ----
-    print("Scaffold split audit ...")
-    sizes, split_rates, leakage, nn_df = split_audit(mn_full)
+    # ---- Split / leakage checks on the modeling split ----
+    print("Split and leakage checks (modeling split) ...")
+    sizes, split_rates, leakage, nn_df = split_checks(frame_full, train, valid, test)
     split_rates.to_csv(OUT / "split_task_active_rates.csv", index=False)
     nn_df.to_csv(OUT / "test_train_tanimoto.csv", index=False)
     summary["split"] = {"sizes": sizes, **leakage}
 
     with open(OUT / "audit_summary.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False, default=str)
-    print(json.dumps(summary, indent=2, ensure_ascii=False, default=str)[:4000])
+    print(json.dumps(summary, indent=2, ensure_ascii=False, default=str)[:3500])
 
 
 if __name__ == "__main__":
