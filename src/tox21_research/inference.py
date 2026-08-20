@@ -13,7 +13,11 @@ from tox21_research.features import ecfp_matrix, maccs_matrix
 from tox21_research.models import MultitaskMLP, predict_per_task
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MAX_SMILES_LENGTH = 10000
+# Input-complexity caps for the service path. The frozen dataset maxima are 342
+# characters and 28 ring-closure digits (7,831 molecules), so both caps keep a
+# wide margin over real chemistry while bounding adversarial parse cost.
+MAX_SMILES_LENGTH = 512
+MAX_RING_CLOSURE_DIGITS = 64
 
 
 class FrozenPredictor(NamedTuple):
@@ -66,8 +70,12 @@ def load_frozen_predictor(repo_root=None) -> FrozenPredictor:
 
 
 def is_valid_smiles(smiles):
-    """Same parse criterion the featurizer applies (MolFromSmiles), with a length guard."""
+    """Same parse criterion the featurizer applies (MolFromSmiles), guarded by
+    input-complexity caps (length, ring-closure digits) checked before parsing
+    so one string cannot force expensive sanitization work."""
     if not isinstance(smiles, str) or not 0 < len(smiles) <= MAX_SMILES_LENGTH:
+        return False
+    if sum(c.isdigit() for c in smiles) > MAX_RING_CLOSURE_DIGITS:
         return False
     return Chem.MolFromSmiles(smiles) is not None
 

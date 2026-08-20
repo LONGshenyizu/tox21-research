@@ -72,7 +72,11 @@ class BodySizeLimitMiddleware:
 
 
 class PredictRequest(BaseModel):
-    smiles: list[str] = Field(..., description="SMILES strings to score")
+    smiles: list[str] = Field(
+        ...,
+        description="SMILES strings to score; each item is capped at 512 characters "
+        "and 64 ring-closure digits, beyond which it is reported as invalid",
+    )
 
 
 class PredictionItem(BaseModel):
@@ -99,7 +103,8 @@ def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=max_body_bytes)
 
     @app.get("/health")
-    def health():
+    async def health():
+        # async: served on the event loop so it never queues behind threadpool work
         return {
             "status": "ok",
             "model_loaded": True,
