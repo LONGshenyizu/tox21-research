@@ -13,8 +13,11 @@ COPY environment/requirements.txt ./environment/requirements.txt
 RUN pip install --no-cache-dir -r environment/requirements.txt
 
 # application code and frozen model artifacts only (no training data, no dataset cache)
-COPY src/ ./src/
-COPY results/final/ ./results/final/
+RUN useradd --system --uid 10001 --create-home tox21
+COPY --chown=tox21:tox21 src/ ./src/
+COPY --chown=tox21:tox21 results/final/ ./results/final/
+
+USER tox21
 
 EXPOSE 8000
 
