@@ -92,6 +92,11 @@ class PredictResponse(BaseModel):
     predictions: list[PredictionItem]
 
 
+def _echo(smiles: str) -> str:
+    """Response echo must be UTF-8 encodable; lone surrogates become U+FFFD."""
+    return smiles.encode("utf-8", errors="replace").decode("utf-8")
+
+
 def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
     """Build the app with the frozen model loaded once at startup."""
     predictor = load_frozen_predictor(repo_root)
@@ -124,7 +129,7 @@ def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
         items = [
             PredictionItem(
                 index=i,
-                smiles=row["smiles"],
+                smiles=_echo(row["smiles"]),
                 valid=row["valid"],
                 probabilities=row["probabilities"],
             )

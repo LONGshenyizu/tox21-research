@@ -114,12 +114,16 @@ def load_frozen_predictor(repo_root=None) -> FrozenPredictor:
 def is_valid_smiles(smiles):
     """Same parse criterion the featurizer applies (MolFromSmiles), guarded by
     input-complexity caps (length, ring-closure digits) checked before parsing
-    so one string cannot force expensive sanitization work."""
+    so one string cannot force expensive sanitization work. Parse failures that
+    raise (e.g. lone UTF-16 surrogates) count as invalid, never as batch errors."""
     if not isinstance(smiles, str) or not 0 < len(smiles) <= MAX_SMILES_LENGTH:
         return False
     if sum(c.isdigit() for c in smiles) > MAX_RING_CLOSURE_DIGITS:
         return False
-    return Chem.MolFromSmiles(smiles) is not None
+    try:
+        return Chem.MolFromSmiles(smiles) is not None
+    except Exception:
+        return False
 
 
 def predict_smiles(predictor, smiles_list):

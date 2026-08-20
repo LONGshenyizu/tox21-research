@@ -226,3 +226,30 @@ class TestModelIntegrity:
         root = copy_frozen_tree(tmp_path)
         with pytest.raises(ValueError, match="escapes"):
             _verified_artifact(root, "../../scripts/predict.py", _load_integrity_manifest())
+
+
+class TestPerItemExceptionIsolation:
+    """F3: an input that makes RDKit raise must fail alone, not the whole batch.
+
+    Pre-fix behavior: a lone UTF-16 surrogate crashed the request twice over —
+    UnicodeEncodeError inside Chem.MolFromSmiles, and (once that was contained)
+    PydanticSerializationError while echoing the surrogate back in the response.
+    """
+
+    def test_lone_surrogate_invalid_not_batch_failure(self, client):
+        r = post_raw(client, {"smiles": ["CCO", "\ud800", "CCN"]})
+        assert r.status_code == 200
+        preds = r.json()["predictions"]
+        assert [p["valid"] for p in preds] == [True, False, True]
+        assert preds[1]["probabilities"] is None
+        assert preds[1]["smiles"] == "?"  # stdlib encode-replacement keeps the echo encodable
+
+    def test_normal_echo_unchanged(self, client):
+        r = post_raw(client, {"smiles": ["CCO"]})
+        assert r.json()["predictions"][0]["smiles"] == "CCO"
+
+    def test_is_valid_smiles_swallows_parse_exceptions(self):
+        from tox21_research.inference import is_valid_smiles
+
+        assert is_valid_smiles("\ud800") is False  # UnicodeEncodeError pre-fix
+        assert is_valid_smiles("\udfff") is False
