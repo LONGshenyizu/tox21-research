@@ -5,11 +5,70 @@ from typing import Any, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
+from starlette.datastructures import Headers
+from starlette.responses import PlainTextResponse
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from tox21_research.data import TASKS
 from tox21_research.inference import load_frozen_predictor, predict_smiles
 
 MAX_BATCH = 512
+MAX_BODY_BYTES = 2 * 1024 * 1024
+
+
+class _BodyTooLargeError(Exception):
+    """Internal signal: the request body crossed the byte cap mid-stream."""
+
+
+class BodySizeLimitMiddleware:
+    """Reject requests whose body exceeds max_bytes (413) before the app buffers it.
+
+    Content-Length is checked first so oversized declared bodies are refused
+    without reading; streaming bodies without a length are counted and cut off
+    at the cap. Bounded bodies also bound the response, which echoes its input.
+    """
+
+    def __init__(self, app: ASGIApp, max_bytes: int):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        length = Headers(scope=scope).get("content-length")
+        if length is not None and length.isdigit() and int(length) > self.max_bytes:
+            await self._send_too_large(scope, receive, send)
+            return
+
+        received = 0
+        response_started = False
+
+        async def limited_receive() -> Message:
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > self.max_bytes:
+                    raise _BodyTooLargeError
+            return message
+
+        async def tracking_send(message: Message) -> None:
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
+        try:
+            await self.app(scope, limited_receive, tracking_send)
+        except _BodyTooLargeError:
+            if response_started:
+                raise
+            await self._send_too_large(scope, receive, send)
+
+    async def _send_too_large(self, scope: Scope, receive: Receive, send: Send) -> None:
+        response = PlainTextResponse("request body too large", status_code=413)
+        await response(scope, receive, send)
 
 
 class PredictRequest(BaseModel):
@@ -29,7 +88,7 @@ class PredictResponse(BaseModel):
     predictions: list[PredictionItem]
 
 
-def create_app(repo_root=None) -> FastAPI:
+def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
     """Build the app with the frozen model loaded once at startup."""
     predictor = load_frozen_predictor(repo_root)
     app = FastAPI(
@@ -37,6 +96,7 @@ def create_app(repo_root=None) -> FastAPI:
         version="1.0.0",
         description="12-endpoint activity probabilities from the frozen LightGBM+ECFP4 model",
     )
+    app.add_middleware(BodySizeLimitMiddleware, max_bytes=max_body_bytes)
 
     @app.get("/health")
     def health():
