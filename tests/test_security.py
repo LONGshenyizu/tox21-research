@@ -270,3 +270,15 @@ class TestLogSecurity:
         captured = capfd.readouterr()
         assert "INJ-START" not in captured.err + captured.out
         assert "SMILES Parse Error" not in captured.err
+
+
+class TestDocsDisabled:
+    """F5: capability-disclosure endpoints must not be exposed.
+
+    Pre-fix behavior: GET /docs, /redoc and /openapi.json returned 200 without
+    authentication, publishing the full request schema.
+    """
+
+    @pytest.mark.parametrize("path", ["/docs", "/redoc", "/openapi.json"])
+    def test_docs_endpoints_return_404(self, client, path):
+        assert client.get(path).status_code == 404

@@ -109,6 +109,9 @@ def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
         title="Tox21 frozen-model inference",
         version="1.0.0",
         description="12-endpoint activity probabilities from the frozen LightGBM+ECFP4 model",
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
     )
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=max_body_bytes)
 
