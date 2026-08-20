@@ -2,13 +2,21 @@
 # ABOUTME: Each test class maps to one finding in reports/security_remediation.md; before/after
 # ABOUTME: behavior is documented per class so the fix intent stays auditable.
 import json
+import shutil
 import time
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from tox21_research.api import MAX_BODY_BYTES, create_app
-from tox21_research.inference import MAX_RING_CLOSURE_DIGITS, MAX_SMILES_LENGTH
+from tox21_research.inference import (
+    MAX_RING_CLOSURE_DIGITS,
+    MAX_SMILES_LENGTH,
+    load_frozen_predictor,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
 
 JSON_HEADERS = {"Content-Type": "application/json"}
 # F1 audit PoC payload: 9,998 chars of alternating ring closures, ~3.4 s CPU per string pre-fix.
@@ -169,3 +177,52 @@ class TestSmilesComplexityLimit:
         steroid = "C[C@]12CC[C@H]3C[C@H]([C@@H]1CC[C@@]2(C)O)CCC3=O"  # 8 ring digits
         r = post_raw(client, {"smiles": [fused, steroid]})
         assert [p["valid"] for p in r.json()["predictions"]] == [True, True]
+
+
+def copy_frozen_tree(tmp_path):
+    """A writable clone of results/final under a fake repo root."""
+    shutil.copytree(ROOT / "results" / "final", tmp_path / "results" / "final")
+    return tmp_path
+
+
+class TestModelIntegrity:
+    """P1: frozen artifacts are sha256-verified and path-contained before pickle load.
+
+    Pre-fix behavior: load_frozen_predictor joblib.load'ed whatever bytes sat at
+    the fixed model paths, with no integrity or containment check.
+    """
+
+    def test_valid_copy_loads(self, tmp_path):
+        predictor = load_frozen_predictor(copy_frozen_tree(tmp_path))
+        assert predictor.meta["family"] == "lgbm_ecfp4"
+        assert predictor.meta["seeds"] == [42]
+
+    def test_tampered_model_rejected(self, tmp_path):
+        root = copy_frozen_tree(tmp_path)
+        model = root / "results" / "final" / "model" / "model_seed42.joblib"
+        data = bytearray(model.read_bytes())
+        data[-1] ^= 0xFF
+        model.write_bytes(bytes(data))
+        with pytest.raises(ValueError, match="integrity"):
+            load_frozen_predictor(root)
+
+    def test_tampered_config_rejected(self, tmp_path):
+        root = copy_frozen_tree(tmp_path)
+        config = root / "results" / "final" / "frozen_config.json"
+        config.write_text(config.read_text(encoding="utf-8").replace("42", "43"), encoding="utf-8")
+        with pytest.raises(ValueError, match="integrity"):
+            load_frozen_predictor(root)
+
+    def test_artifact_without_pinned_hash_rejected(self, tmp_path):
+        from tox21_research.inference import _verified_artifact, _load_integrity_manifest
+
+        root = copy_frozen_tree(tmp_path)
+        with pytest.raises(ValueError, match="pinned sha256"):
+            _verified_artifact(root, "model/model_seed999.joblib", _load_integrity_manifest())
+
+    def test_escaping_path_rejected(self, tmp_path):
+        from tox21_research.inference import _verified_artifact, _load_integrity_manifest
+
+        root = copy_frozen_tree(tmp_path)
+        with pytest.raises(ValueError, match="escapes"):
+            _verified_artifact(root, "../../scripts/predict.py", _load_integrity_manifest())
