@@ -253,3 +253,20 @@ class TestPerItemExceptionIsolation:
 
         assert is_valid_smiles("\ud800") is False  # UnicodeEncodeError pre-fix
         assert is_valid_smiles("\udfff") is False
+
+
+class TestLogSecurity:
+    """F4: the service must not echo raw input (with newlines) into its log.
+
+    Pre-fix behavior: RDKit printed "SMILES Parse Error: ... <raw input>" to
+    stderr, so a payload containing '\\nINFO: ...' forged standalone log lines.
+    """
+
+    def test_invalid_input_not_echoed_to_log(self, client, capfd):
+        payload = "INJ-START\nINFO:     127.0.0.1 - \"GET /admin HTTP/1.1\" 200 OK"
+        r = post_raw(client, {"smiles": [payload]})
+        assert r.status_code == 200
+        assert r.json()["predictions"][0]["valid"] is False
+        captured = capfd.readouterr()
+        assert "INJ-START" not in captured.err + captured.out
+        assert "SMILES Parse Error" not in captured.err

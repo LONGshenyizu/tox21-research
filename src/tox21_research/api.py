@@ -9,6 +9,8 @@ from starlette.datastructures import Headers
 from starlette.responses import PlainTextResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from rdkit import RDLogger
+
 from tox21_research.data import TASKS
 from tox21_research.inference import load_frozen_predictor, predict_smiles
 
@@ -99,6 +101,9 @@ def _echo(smiles: str) -> str:
 
 def create_app(repo_root=None, max_body_bytes=MAX_BODY_BYTES) -> FastAPI:
     """Build the app with the frozen model loaded once at startup."""
+    # RDKit echoes unparsable input verbatim to stderr; keep raw request bytes
+    # out of the service log (the research scripts disable the same channel).
+    RDLogger.DisableLog("rdApp.*")
     predictor = load_frozen_predictor(repo_root)
     app = FastAPI(
         title="Tox21 frozen-model inference",
