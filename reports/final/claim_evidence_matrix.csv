@@ -1,0 +1,18 @@
+id,claim,evidence,status
+C01,数据来源校验和固定,"sha256sum 实测 8 个原始文件全部匹配 data/raw/PROVENANCE.md；download_data.py 内嵌同一组哈希且不匹配即失败（两轮独立复核）",SUPPORTED
+C02,数据规模与分割,"gzip 解压 7,831 数据行；独立重算 scaffold split 与 npz 逐元素全等（6,258/782/783，建模 7,823，8 条丢弃 mol_id 与 manifest 一致）",SUPPORTED
+C03,scaffold 分割与 DeepChem 等价,"src/tox21_research/splits.py 与 deepchem master ScaffoldSplitter 逐行同构（浮点 cutoff、(len,首索引) 排序、贪心填充）；第三方独立实现复现逐元素一致",SUPPORTED
+C04,valid 选型宏 ROC-AUC 0.7376,"results/interim/model_comparison.csv 首行（LGBM leaves=63/trees=800）0.7376/PR 0.3665；次优 LogReg C=0.1 差 0.0009；valid_metrics_ensemble.csv 0.737576",SUPPORTED
+C05,冻结 scaffold test 宏 ROC-AUC 0.7003,"第三方用 sklearn 从 test_predictions_ensemble.csv + npz 标签重算：0.700314/0.321138/0.602436，12 终点逐项与 test_metrics_ensemble.csv 一致；ensemble 与 seed42 预测 bitwise 全等",SUPPORTED
+C06,random 分割对照 0.807±0.010,"random_split_sensitivity.csv：0.7959/0.8055/0.8205，均值 0.8073，std(ddof=0)=0.0101；与 scaffold 差 0.107",SUPPORTED
+C07,test 一次性冻结评测,"results/final/ 全部文件首现于单一 commit 84ccf59；文件 mtime 显示 test 指标单次突发写入、random 敏感性在其后；run_experiments.py 不引用 test_idx；配置文件头部声明同一纪律",SUPPORTED
+C08,无数据泄漏,"test_train_tanimoto.csv：中位 0.4054/均值 0.4354/≥0.95 共 7/≥0.85 共 12；跨分割同 InChIKey 1 例（审计重算记录）；与 data_audit §4 引用一致",SUPPORTED
+C09,跨版本标签冲突已量化,"cross_version_label_agreement.csv 三约定冲突 228/11/102 对，both-labeled 77,889 对，占比 0.014%–0.29%；与 data_audit §1 表述逐数一致",SUPPORTED
+C10,主结论表述克制,"final_report §8/§10.2 与 README 均限定为观察性结论、不外推因果、要求引用同报协议；v1 偏因果表述已在 v2 修订（revision_log #4）",SUPPORTED
+C11,环境可复现,"requirements.txt 56 包全部 ==精确锁定且与 venv pip freeze 逐条一致；python 3.11.9；torch CPU 源首行；56 包 OSV 查询 0 已知漏洞",SUPPORTED
+C12,全量测试通过,"两轮独立执行 pytest tests/ -q → 84 passed / 0 failed（45 科研 + 17 API + 22 安全回归）",SUPPORTED
+C13,API/CLI/容器三方一致,"API↔CLI 105×12 概率 max|diff|=1.11e-16（两轮独立实测）；容器侧 1.11e-16 与重启哈希一致为工程冻结期记录，本轮未重建镜像",SUPPORTED WITH LIMITATION
+C14,安全修复后 CLI 逐字节可复现,"105 分子固定样本输出 sha256 613bea2d… 与修复前基线全等；data/processed 与 results/final 相对 43b4513 零 diff",SUPPORTED
+C15,安全 findings 全部关闭,"7 finding↔7 commit 一一对应；F1（病理批量 26.6s→2.6-34ms 全 invalid）/F2（>2MB 1.9ms 内 413）/F3（代理对 200 逐项失效）/F5（docs 404）经两轮独立实测；P1 篡改 1 字节即拒启；H1 非 root",SUPPORTED WITH LIMITATION
+C16,模型行为未因安全修复改变,"git diff 43b4513..HEAD 逐行审查：仅输入入闸判定/加载校验/文档端点变动，featurize 与预测路径未动；数据集 7,831 分子 max 长度 342/环数字 28，0 分子受新上限影响",SUPPORTED
+C17,T1（隔离内网）deployment ready,"findings 关闭 + 科学零改动 + 84 tests 通过的证据链自洽；残余脚注：镜像构建实测与供应链 hash 固定待网络可用后补做",SUPPORTED WITH LIMITATION
