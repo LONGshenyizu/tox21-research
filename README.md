@@ -73,7 +73,7 @@ curl http://127.0.0.1:8000/health
 curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -d '{"smiles":["CCO"]}'
 ```
 
-镜像离线推理（不下载训练数据、不训练）；以非 root 用户（uid 10001 `tox21`）运行；仅包含 `src/` 与 `results/final/`（`.dockerignore` 排除数据/报告/git）。跨平台已知 1-ULP（1.11e-16）浮点差异，对比以 1e-12 容差判等（`reports/engineering_freeze.md` §4）。
+镜像离线推理（不下载训练数据、不训练）；以非 root 用户（uid 10001 `tox21`）运行；仅包含 `src/` 与 `results/final/`（`.dockerignore` 排除数据/报告/git）。以上已于 2026-08-21 实测通过（构建、health、非 root、容器↔本地 CLI 预测 1.11e-16，见 `reports/final/final_status.md` §3）。跨平台已知 1-ULP（1.11e-16）浮点差异，对比以 1e-12 容差判等（`reports/engineering_freeze.md` §4）。
 
 ## 6. 安全审计与修复状态
 

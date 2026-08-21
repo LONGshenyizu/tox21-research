@@ -30,7 +30,7 @@
 
 | # | 限制 | 状态 |
 |---|---|---|
-| SEC1 | Docker 镜像构建与非 root 运行的**物理实测**依赖网络（见 final_status.md 的最新记录） | H1 修复为静态验证 + 构建实测（若完成） |
+| SEC1 | ~~Docker 镜像构建与非 root 运行的物理实测~~ | **已于 2026-08-21 完成**（final-package 分支：build 成功、uid=10001、health/predict 正常、容器↔CLI 1.11e-16，见 final_status.md §3）；仅剩供应链 E1 |
 | SEC2 | P1 的 manifest（model_integrity.json）自身不自校验，且在容器内与代码同属主 | 攻击者到该权限已可直接改代码，无实际增量暴露；可选 `:ro` 挂载收紧 |
 | SEC3 | 预检 413 时"先写完 body 再读响应"的简单客户端可能收到连接中断而非 413 | HTTP 语义允许；标准客户端实测稳定收到 413 |
 
