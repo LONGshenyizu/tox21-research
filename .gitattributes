@@ -1,0 +1,2 @@
+# ABOUTME: Frozen artifacts must check out byte-identical on every platform so pinned sha256 verification is environment-independent.
+results/final/** binary
