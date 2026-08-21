@@ -1,0 +1,21 @@
+# ABOUTME: Minimal CI for the release artifact: install pinned environment, run the test suite, verify artifact integrity.
+# ABOUTME: No training, no data download; the two raw-data regression tests skip themselves when data is absent.
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pinned environment
+        run: pip install -r environment/requirements.txt
+      - name: Run tests
+        run: python -m pytest tests/ -q
+      - name: Verify release artifacts
+        run: python scripts/verify_artifacts.py

@@ -105,6 +105,7 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -
 2. 按 `reports/final/reproducibility.md` 重算头条指标（无需重训：从 `results/final/*.csv` + `data/processed/*.npz` 直接重算 0.7003/0.3211）。
 3. 按 `reports/final/claim_evidence_matrix.csv` 逐条对照 Claim/Evidence/Status。
 4. 安全回归：`pytest tests/test_security.py -q`（22 项）。
+5. 工件完整性：`python scripts/verify_artifacts.py`（模型哈希/配置一致性/分割清单/原始数据校验和）。
 
 ## 9. 目录结构与文档地图
 
@@ -127,6 +128,10 @@ reports/             全部阶段报告：
   security_remediation.md 安全修复报告（阶段 9）
   final/                  最终证据包（阶段 11，本分支新增）
 environment/         requirements.txt（56 包精确锁定）+ python 版本
+LICENSE              MIT 许可证
+CITATION.cff         引用元数据（DOI/仓库 URL 为发布时占位符）
+CHANGELOG.md         阶段化变更记录（冻结→审计→修复→评审→发布）
+.github/workflows/   最小 CI（install → tests → artifact 校验，无训练）
 ```
 
 注：`reports/` 内各阶段文档为**时间戳记录**（写作时点的测试数等以当时为准，如 final_report 的 45 项测试）；当前状态一律以本 README 与 `reports/final/` 为准。

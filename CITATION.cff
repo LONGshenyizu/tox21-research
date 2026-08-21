@@ -1,0 +1,23 @@
+# ABOUTME: Citation metadata for the Tox21 reproducible-research software artifact.
+# ABOUTME: DOI and repository URL are placeholders to be filled at archival time (Zenodo/GitHub release).
+cff-version: 1.2.0
+message: "If you use this software or its frozen results, please cite it and report the split protocol alongside any metric."
+title: "Tox21 multi-endpoint toxicity prediction: a reproducible research and inference artifact"
+authors:
+  - family-names: "龙神一族"
+type: software
+version: 1.0.0
+date-released: "2026-08-21"
+license: MIT
+repository-code: "https://github.com/placeholder/tox21-research"   # replace with the public repository URL at release
+identifiers:
+  - type: doi
+    value: "10.0000/zenodo.placeholder"                            # replace with the archived DOI at release
+keywords:
+  - Tox21
+  - quantitative structure-activity relationship
+  - reproducible research
+  - scaffold split
+  - LightGBM
+  - ECFP4
+  - FastAPI

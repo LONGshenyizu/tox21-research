@@ -1,8 +1,10 @@
 [project]
 name = "tox21-research"
-version = "0.1.0"
+version = "1.0.0"
 description = "Reproducible multi-endpoint toxicity prediction on public Tox21 data"
 requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "龙神一族" }]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
