@@ -1,10 +1,10 @@
-# Tox21 多终点毒性预测：可复现研究与推理服务（最终版）
+# Tox21 多终点毒性预测：可复现研究与推理服务
 
-本项目是面向**第三方研究者、审稿人与工程使用者**的完整科研软件工程产物：基于公开 Tox21 数据完成 12 终点毒性预测的可复现研究（数据审计 → 选型 → 冻结评测 → 独立审计 → 修订冻结），并将其工程化为经过安全审计与修复的 FastAPI 推理服务。**全部科学结论均可从 git 工件只读重算**——对照表见 `reports/final/claim_evidence_matrix.csv`，重算方法见 `reports/final/reproducibility.md`。
+项目是面向**第三方研究者、审稿人与工程使用者**的完整科研软件工程产物：基于公开 Tox21 数据完成 12 终点毒性预测的可复现研究（数据审计 → 选型 → 冻结评测 → 独立审计 → 修订冻结），并将其工程化为经过安全审计与修复的 FastAPI 推理服务。**全部科学结论均可从 git 工件只读重算**——对照表见 `reports/final/claim_evidence_matrix.csv`，重算方法见 `reports/final/reproducibility.md`。
 
 ## 1. 项目目标
 
-不是刷榜，而是回答：在严格协议下，(a) 经典指纹+浅层模型在 Tox21 上的真实泛化能力是多少；(b) scaffold 与 random 分割的差异有多大；(c) 公共数据两个版本（MoleculeNet CSV 与 2014 挑战赛 SDF）的标签一致性如何。目标是**来源可溯、协议合理、结果可复现、结论克制**。
+回答：在严格协议下，(a) 经典指纹+浅层模型在 Tox21 上的真实泛化能力是多少；(b) scaffold 与 random 分割的差异有多大；(c) 公共数据两个版本（MoleculeNet CSV 与 2014 挑战赛 SDF）的标签一致性如何。目标是**来源可溯、协议合理、结果可复现、结论克制**。
 
 ## 2. 数据来源
 
@@ -12,7 +12,7 @@
 - **2014 Tox21 挑战赛 SDF**（data_all / challenge_test / challenge_score）：NIH tripod 下载，同上校验和固定。
 - 数据审计：跨版本按化合物编号 100% 对应；标签高度一致但存在少量批次聚约定依赖的冲突（228/11/102 对，占 both-labeled 的 0.014%–0.29%，三种聚约定口径），详见 `reports/data_audit.md` §1 与 `results/interim/audit/cross_version_label_agreement.csv`。
 
-## 3. 科研流程（九环节闭环）
+## 3. 科研流程（九个环节）
 
 ```
 数据固定(SHA-256) → 数据审计 → 预登记协议 → valid 选型 → 一次性冻结 test 评测
