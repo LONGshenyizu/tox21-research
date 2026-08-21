@@ -43,7 +43,7 @@
 - 冻结纪律：`run_experiments.py` 不引用 test_idx（grep 证实）；results/final 首现于单 commit `84ccf59`；test 指标 mtime 单次突发、random 在其后。
 - 数据与泄漏：冲突 228/11/102、both 77,889、Tanimoto 中位 0.4054/≥0.95 共 7——逐数吻合。
 - 工件：`model_integrity.json` 两条 sha256 MATCH；`frozen_config.json ≡ configs/final_model.json`；预测 CSV 行序与 npz test_idx 逐项相等。
-- 冒烟：阿司匹林全终点 <0.01；苯并噻唑砜 AhR 0.9998 / SR-ARE 0.9946。
+- 冒烟：阿司匹林全终点 <0.01；苯并噻唑砜 AhR 0.9998 / SR-ARE 0.9946（可按 reproducibility.md L2 第 5 步复算）。
 - 发现文档错误 2 处（主张计数、模块数）——均已修正。
 
 ## 最终建议

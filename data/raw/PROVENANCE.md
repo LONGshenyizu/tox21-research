@@ -29,6 +29,14 @@
 
 完整 URL 形如：`https://tripod.nih.gov/tox21/challenge/download?id=<id>&sec=`。
 
+三个 ZIP 解压后 SDF 的独立 SHA-256（解压产物未入 git，由 `download_data.py` 重建；下载后解压可按此校验）：
+
+| 文件 | SHA-256 |
+|---|---|
+| `tox21_10k_data_all.sdf` | `d66e1f9ec945ee528b1bea6e49af9c10d0bad546c2b304eb96004c8228824206` |
+| `tox21_10k_challenge_test.sdf` | `98ef9e89a030962ec27c5b437d6daf415234a45479dc4c86c72006f9e3b9b4db` |
+| `tox21_10k_challenge_score.sdf` | `0ee45ed2351c230bdced31e8bd5f706a89f592e3c082caefa9770d5a29f1c343` |
+
 ## 3. 版本关系（审计结论，详见 reports/data_audit.md）
 
 - 原始训练库 11,764 条样本记录（NCGC 批次级）→ 按化合物去重为 8,041 个唯一 DSSTox_CID；加上 3 条 RDKit 不可解析记录的 CID（28914×2、29072）后唯一 CID 并集为 8,043，与 Huang et al. 2016 报告的挑战赛训练集 "8043 samples" 数字闭合。

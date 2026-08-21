@@ -16,6 +16,7 @@
 | 9 | 安全修复 + 回归验证（7 commits，84 tests，REGRESSION PASS） | `security-hardening` `c05145a` | 完成 |
 | 10 | 最终独立评审（头条数字全部独立重算吻合） | 评审报告（对话存档；复核结论已并入本目录证据矩阵） | 完成 |
 | 11 | 发布包 + Docker 验证 + 审稿模拟 | `final-package`（本分支）+ `peer_review_simulation.md` | 完成 |
+| 12 | 发布工件（LICENSE/CITATION/CHANGELOG/CI/校验器）+ 工件终审 | `final-package`；终审判定 READY WITH MINOR FIXES，minor 项已修（路径脱敏/措辞对齐/SDF 哈希），tag `v1.0.0` | 完成 |
 
 ## 2. 一句话判定
 

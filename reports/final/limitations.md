@@ -25,6 +25,7 @@
 | E6 | 跨平台 1-ULP（1.11e-16）浮点差异 | Windows 与 Linux 求和顺序不同 | 已量化并声明 1e-12 判等容差（engineering_freeze §4/§6） |
 | E7 | API 契约在安全修复后有三处变化（body 2MB 上限、SMILES 512 字符/64 环数字、docs 关闭） | 依赖旧行为的客户端需适配；化学合法但超限的输入会被判 invalid | 全部文档化于 security_remediation §2/§6，并有回归测试 |
 | E8 | 单 worker、无认证/限流/可观测性 | 仅适用于 T1（隔离内网） | 冻结文档 §6 声明的刻意决策；对外暴露（T2）前需代理层认证限流 |
+| E9 | pyproject 缺 `[project.urls]`；CITATION.cff 的仓库 URL/DOI 为占位符 | 发布元数据不完整 | 公开仓库 URL 与 Zenodo DOI 落定后替换（发布流程内动作） |
 
 ## 3. 安全层（残余项）
 

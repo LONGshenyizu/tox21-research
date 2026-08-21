@@ -27,7 +27,7 @@
 - H1 root 容器：非 root uid 10001（`452762e`；后经 Stage 11 构建实测确认）。
 - 修复报告与回归记录：`reports/security_remediation.md`（`c05145a`）；两轮独立于主实现的代理回归验证 REGRESSION PASS。
 
-### 安全审计（Stage 7，2026-08-20 复审；security-audit 分支 `f21fcde`）
+### 安全审计（Stage 7；security-audit 分支 `f21fcde`，2026-08-14 审计冻结、2026-08-20 独立复审确认）
 - 白盒审计：F1-F5 confirmed（PoC 验证）、P1 potential（RCE 原语证明）、H1 hardening；依赖 OSV 全量 56 包 0 已知漏洞。
 
 ### 工程冻结（Stage 6/8，2026-08-14，`43b4513`，revision-v2 分支）

@@ -1,7 +1,7 @@
 id,claim,evidence,status
 C01,数据来源校验和固定,"sha256sum 实测 8 个原始文件全部匹配 data/raw/PROVENANCE.md；download_data.py 内嵌同一组哈希且不匹配即失败（两轮独立复核）",SUPPORTED
 C02,数据规模与分割,"gzip 解压 7,831 数据行；独立重算 scaffold split 与 npz 逐元素全等（6,258/782/783，建模 7,823，8 条丢弃 mol_id 与 manifest 一致）",SUPPORTED
-C03,scaffold 分割与 DeepChem 等价,"src/tox21_research/splits.py 与 deepchem master ScaffoldSplitter 逐行同构（浮点 cutoff、(len,首索引) 排序、贪心填充）；独立复核实现逐元素复现一致（与 deepchem 库本体的直接对照未在仓库内执行）",SUPPORTED
+C03,scaffold 分割实现符合 DeepChem ScaffoldSplitter 公开行为规格（未与库本体直接对照）,"src/tox21_research/splits.py 与 deepchem master ScaffoldSplitter 逐行同构（浮点 cutoff、(len,首索引) 排序、贪心填充）；独立复核实现逐元素复现一致",SUPPORTED
 C04,valid 选型宏 ROC-AUC 0.7376,"results/interim/model_comparison.csv 首行（LGBM leaves=63/trees=800）0.7376/PR 0.3665；次优 LogReg C=0.1 差 0.0009；valid_metrics_ensemble.csv 0.737576",SUPPORTED
 C05,冻结 scaffold test 宏 ROC-AUC 0.7003,"第三方用 sklearn 从 test_predictions_ensemble.csv + npz 标签重算：0.700314/0.321138/0.602436，12 终点逐项与 test_metrics_ensemble.csv 一致；ensemble 与 seed42 预测 bitwise 全等",SUPPORTED
 C06,random 分割对照 0.807±0.010,"random_split_sensitivity.csv：0.7959/0.8055/0.8205，均值 0.8073，std(ddof=0)=0.0101；与 scaffold 差 0.107",SUPPORTED

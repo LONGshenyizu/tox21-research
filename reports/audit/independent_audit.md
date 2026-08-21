@@ -1,9 +1,9 @@
 # 独立科研复现审查报告（Independent Scientific Audit）
 
-- 审查对象：`C:/Users/admin/Desktop/text`，冻结 commit `84ccf59`（Stage 3）；前置 `3e586e6`（Stage 2）、`53cc814`（Stage 1）。审查期间 HEAD 始终为 `84ccf59`，未 checkout、未修改任何被跟踪文件。
+- 审查对象：`<repo-root>`，冻结 commit `84ccf59`（Stage 3）；前置 `3e586e6`（Stage 2）、`53cc814`（Stage 1）。审查期间 HEAD 始终为 `84ccf59`，未 checkout、未修改任何被跟踪文件。
 - 审查人：Independent Scientific Auditor（独立复现审查人，非协作者）。
 - 审查日期：2026-08-14。
-- 运行环境：仓库 venv `C:/Users/admin/Desktop/text/.venv/Scripts/python.exe`（Python 3.11.9，rdkit 2026.03.5，scikit-learn 1.9.0，LightGBM 4.7.0，pandas 3.0.5，numpy 2.4.6，torch 2.13.0+cpu）。
+- 运行环境：仓库 venv `<repo-root>/.venv/Scripts/python.exe`（Python 3.11.9，rdkit 2026.03.5，scikit-learn 1.9.0，LightGBM 4.7.0，pandas 3.0.5，numpy 2.4.6，torch 2.13.0+cpu）。
 - 方法：只读审查 + 内存重算。所有诊断脚本位于系统临时目录（`/tmp/audit/*.py`），未向 `data/`、`results/`、`src/`、`scripts/`、`configs/` 写入任何内容；未运行任何会写仓库目录的脚本（`audit_data.py`/`prepare_data.py`/`run_experiments.py`/`error_analysis.py`/`final_test.py`/`random_split_check.py`/`download_data.py`/`predict.py` 均未运行）。重算包括：从原始 CSV 重现两种 scaffold 分割并逐分子 ID 比较；用仓库 loader 重做跨版本标签比对（含正确 merge）；由保存的预测与 npz 标签重算全部冻结指标；重训 seed42 LightGBM 与三个 random split 复现。`pytest tests/ -q`：35 passed。
 
 ---
