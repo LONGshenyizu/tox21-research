@@ -4,12 +4,13 @@ cff-version: 1.2.0
 message: "If you use this software or its frozen results, please cite it and report the split protocol alongside any metric."
 title: "Tox21 multi-endpoint toxicity prediction: a reproducible research and inference artifact"
 authors:
-  - family-names: "龙神一族"
+  - name: "龙神一族"
+    email: "204482948+LONGshenyizu@users.noreply.github.com"
 type: software
 version: 1.0.0
 date-released: "2026-08-21"
 license: MIT
-repository-code: "https://github.com/placeholder/tox21-research"   # replace with the public repository URL at release
+repository-code: "https://github.com/LONGshenyizu/tox21-research"
 identifiers:
   - type: doi
     value: "10.0000/zenodo.placeholder"                            # replace with the archived DOI at release

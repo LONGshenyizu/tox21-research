@@ -1,0 +1,31 @@
+{
+  "title": "Tox21 multi-endpoint toxicity prediction: a reproducible research and inference artifact",
+  "description": "Reproducible research artifact for 12-endpoint toxicity prediction on the public Tox21 dataset: data provenance and dual-version audit, pre-registered protocol, Murcko-scaffold frozen evaluation (LightGBM + ECFP4, macro ROC-AUC 0.7003 on the scaffold test split; random-split control 0.807 +/- 0.010), independent audit and revision records, a security-audited FastAPI inference service, Docker image (non-root), 84 tests, and an artifact integrity verifier. All headline numbers are recomputable from the frozen git artifacts (see reports/final/reproducibility.md).",
+  "creators": [
+    {
+      "name": "龙神一族",
+      "affiliation": "Independent researcher"
+    }
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "version": "1.0.0",
+  "publication_date": "2026-08-21",
+  "keywords": [
+    "Tox21",
+    "quantitative structure-activity relationship",
+    "reproducible research",
+    "scaffold split",
+    "LightGBM",
+    "ECFP4",
+    "FastAPI"
+  ],
+  "language": "eng",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/LONGshenyizu/tox21-research",
+      "relation": "isSupplementTo"
+    }
+  ],
+  "notes": "DOI intentionally pending until Zenodo deposition; CITATION.cff in the repository carries the placeholder and is updated at deposition time."
+}

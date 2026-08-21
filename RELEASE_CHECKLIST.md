@@ -23,8 +23,8 @@
 - [x] scripts/verify_artifacts.py（本地 PASSED：模型哈希/配置一致性/分割清单/原始数据 7 文件哈希）
 - [x] 测试：本地 84 passed（fresh clone/CI 上为 82 passed + 2 skipped——慢测试需原始数据，语义已声明）
 - [x] tag：v1.0.0（annotated，指向本提交）
-- [ ] repository URL：**待填**（占位 `https://github.com/placeholder/tox21-research`，位于 CITATION.cff L12）
-- [ ] DOI：**待填**（占位 `10.0000/zenodo.placeholder`，位于 CITATION.cff L15）
+- [x] repository URL：`https://github.com/LONGshenyizu/tox21-research`（CITATION.cff 已更新）
+- [ ] DOI：**待填**（占位 `10.0000/zenodo.placeholder`，位于 CITATION.cff；Zenodo 元数据已备好于 `.zenodo.json`）
 
 ## 2. Release notes 草稿（可直接用于 GitHub Release）
 
