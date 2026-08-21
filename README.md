@@ -20,7 +20,7 @@
 → 安全审计 → 安全修复+回归验证 → 最终独立评审
 ```
 
-- 分割：Murcko scaffold 80/10/10（与 DeepChem ScaffoldSplitter 逐元素等价，独立复现核对），6,258/782/783；8 条不可解析 SMILES 显式丢弃并记录 mol_id。
+- 分割：Murcko scaffold 80/10/10（按 DeepChem ScaffoldSplitter 的公开行为规格实现并以测试锁定确定性与自洽；与 deepchem 库本体的直接对照未在仓库内执行），6,258/782/783；8 条不可解析 SMILES 显式丢弃并记录 mol_id。
 - 选型只在 valid 上进行（LogReg / LightGBM / 多任务 MLP）；test 只在冻结配置下评测一次（git 历史与文件时间戳可证）。
 - 泄漏检查：test↔train Tanimoto 中位 0.405、≥0.95 共 7 分子（骨架外推困难但分割干净），见 `results/interim/audit/test_train_tanimoto.csv`。
 
@@ -45,7 +45,7 @@
 
 模型：LightGBM（leaves 63, trees 800, lr 0.05）× 12 单任务 + ECFP4（Morgan r=2, 2048bit）；冻结配置 `results/final/frozen_config.json`，模型 `results/final/model/model_seed42.joblib`（SHA-256 由 `src/tox21_research/model_integrity.json` 固定并在加载时校验）。
 
-**主结论（观察性）**：在本研究协议对比中，分割协议造成的差异（0.107）远大于模型族间差异（0.036）。不外推因果；引用本仓库数字必须同时报告分割协议。
+**主结论（观察性）**：在本研究协议对比中观察到分割协议差异（scaffold→random，test 口径 0.107）大于模型族间差异（valid 选型口径极差 0.036）。两者口径不同，且 scaffold 为单一实现（无分割方差）、random 为 3 种子；不外推因果与一般规律；引用本仓库数字必须同时报告分割协议。
 
 ## 5. 工程部署
 
@@ -77,7 +77,7 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -
 
 ## 6. 安全审计与修复状态
 
-审计（`security-audit` 分支）确认 5 项 confirmed + 1 项 potential + 1 项 hardening；修复（`security-hardening` 分支）逐项对应 commit、回归测试与前后行为数字，并经两轮独立代理回归验证（REGRESSION PASS）：
+审计（`security-audit` 分支）确认 5 项 confirmed + 1 项 potential + 1 项 hardening；修复（`security-hardening` 分支）逐项对应 commit、回归测试与前后行为数字，并经两轮由独立于主实现的代理执行的回归验证（REGRESSION PASS；代理复核，非外部第三方）：
 
 | Finding | 问题（一句话） | 修复 commit | 状态 |
 |---|---|---|---|
@@ -111,7 +111,7 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -
 ```text
 data/raw/            原始数据 + PROVENANCE.md（SHA-256 固定）
 data/processed/      建模缓存（npz + manifest）
-src/tox21_research/  核心库（12 个模块，含 API、推理、完整性清单）
+src/tox21_research/  核心库（10 个 Python 模块，另含模型完整性清单 JSON）
 scripts/             数据下载/审计/训练/评测/推理入口脚本
 tests/               84 项测试（含 22 项安全回归、真实数据回归标记 slow）
 configs/             实验配置与冻结配置

@@ -14,12 +14,12 @@
 | 6/8 | Engineering / API Freeze v1 | `43b4513` | 完成（62 tests） |
 | 7 | 安全审计（F1-F5/P1/H1，全部 PoC 验证） | `security-audit` `f21fcde` | 完成 |
 | 9 | 安全修复 + 回归验证（7 commits，84 tests，REGRESSION PASS） | `security-hardening` `c05145a` | 完成 |
-| 10 | 最终独立评审（头条数字全部独立重算吻合） | 评审报告（对话存档） | 完成 |
-| 11 | 发布包 + Docker 验证 + 审稿模拟 | `final-package`（本分支） | 本文件 |
+| 10 | 最终独立评审（头条数字全部独立重算吻合） | 评审报告（对话存档；复核结论已并入本目录证据矩阵） | 完成 |
+| 11 | 发布包 + Docker 验证 + 审稿模拟 | `final-package`（本分支）+ `peer_review_simulation.md` | 完成 |
 
 ## 2. 一句话判定
 
-**科学结论**：全部主要数字（0.7376 / 0.7003+0.3211 / 0.807±0.010 / 分割 6258-782-783 / 冲突 228-11-102）经第三方独立从 git 工件重算并吻合——`claim_evidence_matrix.csv` 17 项主张中 14 项 SUPPORTED、3 项 SUPPORTED WITH LIMITATION、0 项 NEEDS REVISION / NOT SUPPORTED。
+**科学结论**：全部主要数字（0.7376 / 0.7003+0.3211 / 0.807±0.010 / 分割 6258-782-783 / 冲突 228-11-102）经独立于主实现的复核（阶段 10 终审代理、阶段 11 模拟审稿代理；均为自动化代理复核，非人类外部第三方）从 git 工件重算并吻合——`claim_evidence_matrix.csv` 17 项主张中 16 项 SUPPORTED、1 项 SUPPORTED WITH LIMITATION、0 项 NEEDS REVISION / NOT SUPPORTED。
 
 **工程与安全**：84 项测试全通过；安全 findings 全部关闭且未改变任何被接受输入的预测（CLI 逐字节一致、API↔CLI 1.11e-16、冻结目录零改动）。
 
