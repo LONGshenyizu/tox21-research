@@ -101,7 +101,7 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -
 
 ## 8. 验证入口（第三方如何信任本仓库）
 
-1. `python -m pytest tests/ -q` → 84 passed。
+1. `python -m pytest tests/ -q` → 84 passed（原始数据在场时；fresh clone/CI 上为 82 passed + 2 skipped，跳过语义见 §7 与 reproducibility.md L1）。
 2. 按 `reports/final/reproducibility.md` 重算头条指标（无需重训：从 `results/final/*.csv` + `data/processed/*.npz` 直接重算 0.7003/0.3211）。
 3. 按 `reports/final/claim_evidence_matrix.csv` 逐条对照 Claim/Evidence/Status。
 4. 安全回归：`pytest tests/test_security.py -q`（22 项）。
